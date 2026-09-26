@@ -1,0 +1,15 @@
+# Core electrochemical simulation
+pybamm==26.8.0
+
+# Machine learning
+xgboost==3.4.0
+scikit-learn==1.6.1
+shap==0.52.0
+
+# Scientific computing / data
+scipy==1.16.3
+numpy==2.0.2
+pandas==2.2.3
+
+# Plotting
+matplotlib==3.10.0
