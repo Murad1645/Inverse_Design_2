@@ -1,4 +1,4 @@
-"""Generate the unfiltered LHS dataset with DFN or SPMe (v2 physics).
+"""Generate the unfiltered LHS dataset with DFN or SPMe 
 Usage: python generate_dataset.py DFN   |   python generate_dataset.py SPMe"""
 import sys, numpy as np, pandas as pd
 from multiprocessing import Pool
@@ -6,7 +6,7 @@ from scipy.stats import qmc
 from electrode_model import RANGES, FEAT, evaluate
 
 KIND = sys.argv[1] if len(sys.argv) > 1 else "DFN"
-OUT = {"DFN": "dataset_dfn_v2.csv", "SPMe": "dataset_spme_v2.csv"}[KIND]
+OUT = {"DFN": "data/dataset_dfn_v2.csv", "SPMe": "data/dataset_spme_v2.csv"}[KIND]
 N, SEED = 2000, 42
 
 lo = np.array([RANGES[k][0] for k in FEAT]); hi = np.array([RANGES[k][1] for k in FEAT])

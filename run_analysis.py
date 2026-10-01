@@ -1,8 +1,9 @@
 """
-Full v2 analysis: surrogates, loading-matched inverse design, DFN re-validation,
-robustness, SPMe fidelity comparison, SHAP, charging/plating, checks.
-Writes every manuscript number to results_v2.json and a readable results_v2.txt.
-Requires dataset_dfn_v2.csv and dataset_spme_v2.csv (generate_dataset.py).
+Full analysis pipeline: surrogate cross-validation, loading-matched inverse
+design, DFN re-validation, discharge-rate sweep, charging/plating analysis,
+SPMe-vs-DFN fidelity comparison, SHAP attribution, and numerical checks.
+Writes every reported number to results/results_v2.json and results/results_v2.txt.
+Run from the repository root after the datasets exist in data/.
 """
 import json, numpy as np, pandas as pd, pybamm, shap
 from scipy.stats import spearmanr, kendalltau
@@ -17,8 +18,8 @@ R = {}; LOG = []
 def log(s=""): print(s, flush=True); LOG.append(s)
 def rnd(d, n=3): return {k: round(float(v), n) for k, v in d.items()}
 
-dfn = pd.read_csv("dataset_dfn_v2.csv"); dfn = dfn[dfn.solver_ok == True].reset_index(drop=True)
-spm = pd.read_csv("dataset_spme_v2.csv"); spm = spm[spm.solver_ok == True].reset_index(drop=True)
+dfn = pd.read_csv("data/dataset_dfn_v2.csv"); dfn = dfn[dfn.solver_ok == True].reset_index(drop=True)
+spm = pd.read_csv("data/dataset_spme_v2.csv"); spm = spm[spm.solver_ok == True].reset_index(drop=True)
 
 # ---------------------------------------------------------------- dataset
 R["dataset"] = dict(n_dfn=len(dfn), fail_dfn=2000 - len(dfn), n_spme=len(spm), fail_spme=2000 - len(spm),
@@ -76,7 +77,7 @@ R["matched"] = dict(n_candidates=len(C), n_pareto=len(pf), selected=SEL,
                     front_Q_min=float(qp[pf].min()), front_Q_max=float(qp[pf].max()))
 log("\n== LOADING-MATCHED INVERSE DESIGN ==")
 log(f" candidates={len(C)} pareto={len(pf)} selected={rnd(SEL)} surrogate Q={qp[k]:.3f} dV={dp[k]:.3f}")
-np.savez("pareto_v2.npz", qp=qp, dp=dp, pf=pf, k=k)
+np.savez("results/pareto.npz", qp=qp, dp=dp, pf=pf, k=k)
 
 eb, es = evaluate(**BASELINE), evaluate(**SEL)
 R["dfn_baseline"], R["dfn_selected"] = eb, es
@@ -198,6 +199,6 @@ for nm, d in [("baseline", BASELINE), ("selected", SEL)]:
 log(" mesh check: " + "; ".join(f"{r['design']} {r['C']}C {r['diff_pct']:.2f}%" for r in R["mesh"]))
 R["default_var_pts"] = {str(k2): v for k2, v in make_model("DFN").default_var_pts.items()}
 
-json.dump(R, open("results_v2.json", "w"), indent=1, default=float)
-open("results_v2.txt", "w").write("\n".join(LOG))
-print("\nDONE -> results_v2.json / results_v2.txt")
+json.dump(R, open("results/results_v2.json", "w"), indent=1, default=float)
+open("results/results_v2.txt", "w").write("\n".join(LOG))
+print("\nDONE -> results/results_v2.json, results/results_v2.txt")

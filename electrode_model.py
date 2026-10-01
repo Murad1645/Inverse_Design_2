@@ -1,16 +1,15 @@
 """
-Single source of truth for the electrode-design physics (v2).
+Electrode-design physics shared by all scripts.
 
-Changes vs v1:
-  (1) Negative-electrode active-material volume fraction is set to 1 - eps
-      (Chen2020 has no separate inactive phase: eps + eps_am = 1). In v1 it
-      stayed at the default 0.75, so eps + eps_am exceeded 1 and simulated
-      capacity scaled with L instead of the loading proxy (1 - eps) L.
-  (2) Polarization dV_3C is evaluated at a fixed depth of discharge,
-      q_ref = 0.25 * Q_0.5C. If the 3C discharge reaches the 2.5 V cut-off
-      before q_ref, V_3C(q_ref) is taken as the cut-off voltage, so dV is a
-      lower bound and failed designs are no longer scored as low-polarization
-      (v1 used q_ref = 0.5 * Q_3C, which rewarded early failure).
+Design parameters are mapped onto the Chen2020 parameter set with the
+negative-electrode active-material volume fraction set to 1 - eps (the
+Chen2020 negative electrode has no separate inactive phase), so that the
+loading proxy S0 = (1 - eps) L is proportional to the active-material loading.
+
+Polarization dV_3C is evaluated at a fixed depth of discharge,
+q_ref = 0.25 * Q_0.5C. If the 3C discharge reaches the 2.5 V cut-off before
+q_ref, V_3C(q_ref) is taken as the cut-off voltage, so dV_3C is a lower bound.
+
 C-rates follow PyBaMM's convention (current = C-rate x nominal 5 A h).
 """
 import numpy as np
@@ -68,11 +67,9 @@ def evaluate(eps, b, Rp_um, L_um, kind="DFN"):
             return {"solver_ok": False}
     except Exception:
         return {"solver_ok": False}
-    q_old = 0.5 * Q3[-1]
     return {"solver_ok": True, "Q05_Ah": float(Q05[-1]), "Q3_Ah": float(Q3[-1]),
             "Q_ratio": float(Q3[-1] / Q05[-1]),
-            "dV_3C": dV_matched(Q05, V05, Q3, V3),
-            "dV_3C_v1def": float(np.interp(q_old, Q05, V05) - np.interp(q_old, Q3, V3))}
+            "dV_3C": dV_matched(Q05, V05, Q3, V3)}
 
 
 def capacity_at(d, crate, kind="DFN"):
