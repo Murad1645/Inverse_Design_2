@@ -1,5 +1,7 @@
 """Graphical abstract (3 panels), drawn in code; numbers read from results/results_v2.json."""
 import json, numpy as np, matplotlib.pyplot as plt
+import os
+os.makedirs("figures", exist_ok=True)
 from matplotlib.patches import FancyBboxPatch, Rectangle, Circle, Ellipse, FancyArrowPatch
 R = json.load(open("results/results_v2.json"))
 plt.rcParams.update({"font.family": "DejaVu Sans", "pdf.fonttype": 42})
